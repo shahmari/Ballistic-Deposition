@@ -1,44 +1,35 @@
 using Plots
 using Statistics
 
-surf = [[] for i=1:200]
-VarList = []
-for n in 0:100
-    randsurf = rand(1:200,1000)
-    for i in randsurf
-        append!(surf[i], n%10)
-    end
-    SurfInTime = []
+function Leveling(surface)
+    maxlen = 0
+    surf = surface
     for i in surf
-        append!(SurfInTime, length(i))
+        if length(i) > maxlen
+            maxlen = length(i)
+        end
     end
-    append!(VarList,std(SurfInTime))
+    for i in surf
+        append!(i, [3 for i=1:maxlen - length(i)])
+    end
+    return surf
 end
 
-maxlen = 0
-for i in surf
-    if length(i) > maxlen
-        maxlen = length(i)
+function Deposition_2DG(len, tot_time, rate, color_step)
+    surf = [[] for i=1:len]
+    for n in 0:tot_time
+        randsurf = rand(1:len,rate)
+        for i in randsurf
+            append!(surf[i], n%color_step)
+        end
     end
-end
-
-for i in surf
-    append!(i, [3 for i=1:maxlen - length(i)])
+    return Leveling(surf)
 end
 
 theme(:dark)
 gr()
-heatmap(hcat(surf...), c = :solar, legend = false, border=:none)
-savefig("C:\\Users\\Yaghoub\\Desktop\\Deposition\\Random-Ballistic-Deposition\\deposition.png")
 
-scatter(VarList,
-    xscale=:log,
-    yscale=:log,
-    ylims = (1,40),
-    xticks=(1:20:101, 0:20:100),
-    yticks=(1:5:40, 0:5:40),
-    xlabel= "Time",
-    ylabel= "W",
-    title= "Log plot of W-Time",
-    legend = nothing)
-savefig("C:\\Users\\Yaghoub\\Desktop\\Deposition\\Random-Ballistic-Deposition\\log-scale.png")
+surf = Deposition_2DG(200, 100, 10000, 10)
+
+heatmap(hcat(surf...), c = :solar, legend = false)
+savefig("C:\\Users\\Yaghoub\\Documents\\GitHub\\Ballistic-Deposition\\Deposition\\Random-Ballistic-Deposition\\Fig\\deposition.png")
