@@ -21,9 +21,9 @@ function Deposition_2DG(len, tot_time, rate, color_step)
         randsurf = rand(2:len + 1, rate)
         for i in randsurf
             if i == 2 && length(surf[i]) >= length(surf[i-1]) - 2
-                append!(surf[i-1], n%10)
+                append!(surf[i-1], n%color_step)
             elseif i == len + 1 && length(surf[i]) >= length(surf[i+1]) - 2
-                append!(surf[i+1], n%10)
+                append!(surf[i+1], n%color_step)
             end
             lens_ = Dict(
                 length(surf[i-1])=>i-1,
@@ -31,7 +31,7 @@ function Deposition_2DG(len, tot_time, rate, color_step)
                 length(surf[i+1])=>i+1,
                     )
             minlen = min(length(surf[i-1]),length(surf[i]),length(surf[i+1]))
-            append!(surf[lens_[minlen]], n%10)
+            append!(surf[lens_[minlen]], n%color_step)
         end
     end
     return Leveling(surf)
