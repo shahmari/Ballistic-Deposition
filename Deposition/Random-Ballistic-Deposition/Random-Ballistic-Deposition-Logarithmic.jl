@@ -1,7 +1,7 @@
 using Plots, LaTeXStrings, Statistics
 
 function Deposition(;len, tot_time, time_steps)
-    Time = exp.(0:10/(time_steps-1):10)
+    Time = exp.(0:tot_time/(time_steps-1):tot_time)
     surf = [0 for i=1:len]
     VarList = [0.0 for i=1:time_steps]
     for n in 1:time_steps
