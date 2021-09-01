@@ -38,7 +38,7 @@ function Deposition_2DG(len, tot_time, rate, color_step)
 end
 
 theme(:dark)
-gr()
+plotlyjs()
 
 surf = Deposition_2DG(200, 100, 1000, 10)
 
