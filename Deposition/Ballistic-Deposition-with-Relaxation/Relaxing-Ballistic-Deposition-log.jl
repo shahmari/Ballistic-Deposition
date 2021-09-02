@@ -1,27 +1,37 @@
 using Plots, LaTeXStrings, Statistics
 
 function Deposition(;len, tot_time, time_steps)
-    Time = exp.(0:tot_time/(time_steps-1):tot_time)
-    surf = [0 for i=1:len+2]
+    Time = exp.(0:tot_time/(time_steps):tot_time)
+    surf = [0 for i=1:len]
     VarList = [0.0 for i=1:time_steps]
-    for n in 1:time_steps
-        randsurf = rand(2:len+1,floor(Int,Time[n]*100 + 1000))
+    for n in 2:time_steps+1
+        randsurf = rand(1:len,floor(Int,Time[n]-Time[n-1]))
         for i in randsurf
-            if i == 2 && surf[i] >= surf[i-1] - 2
-                surf[i-1] += 1
-            elseif i == len+1 && surf[i] >= surf[i+1] - 2
-                surf[i+1] += 1
-            end
-            lens = Dict(surf[i-1]=>i-1,
-                surf[i]=>i,
-                surf[i+1]=>i+1,
-                )
-            minlen = min(surf[i-1],surf[i],surf[i+1])
-            surf[lens[minlen]] += 1
+            index = FindLeast(surf, i, len)
+            surf[index] += 1
         end
-        VarList[n] = std(surf)
+        VarList[n-1] = std(surf)
     end
     return Time, VarList
+end
+
+function sides(n, L)
+    if n == L
+        return n-1 , 1
+    elseif n == 1
+        return L , n+1
+    else
+        return n-1, n+1
+    end
+end
+
+function FindLeast(surface, index_,L_surf)
+    i1 , i2 = sides(index_, L_surf)
+    lens = Dict(surface[i1]=>i1,
+        surface[index_]=>index_,
+        surface[i2]=>i2)
+    minlen = min(surface[i1],surface[index_],surface[i2])
+    return lens[minlen]
 end
 
 function Linear_fit(;Time, VarList, time_steps)
@@ -77,8 +87,8 @@ savefig("C:\\Users\\Yaghoub\\Documents\\GitHub\\Ballistic-Deposition\\Deposition
 =#
 iternum = 1000
 Parameters = Dict(:len => 300,
-                    :tot_time => 8,
-                        :time_steps => 50)
+                    :tot_time => 12,
+                        :time_steps => 100)
 allVar = [ [0.0 for i in 1:Parameters[:time_steps]] for j = 1:iternum]
 meanVar = [0.0 for i in 1:Parameters[:time_steps]]
 vars = [0.0 for i in 1:Parameters[:time_steps]]
@@ -93,15 +103,15 @@ for i in 1:Parameters[:time_steps]
     vars[i] = std(log.(hcat(allVar...))[i,:])
 end
 
-Time = exp.(0:Parameters[:tot_time]/(Parameters[:time_steps]-1):Parameters[:tot_time])
-scatter(log.(Time),log.(meanVar),
+Time = hcat(0:Parameters[:tot_time]/(Parameters[:time_steps]-1):Parameters[:tot_time])
+scatter(Time, log.(meanVar),
     xlabel= L"Log\ Time",
     ylabel= L"Log\ W_{(t)}",
     title= L"Log-Log\ Plot\ ~W_{(t)}-Time~\ (L = 300)",
     label = L"Data\ point",
     yerror = vars,
     legend = nothing)
-savefig("C:\\Users\\Yaghoub\\Documents\\GitHub\\Ballistic-Deposition\\Deposition\\Ballistic-Deposition-with-Relaxation\\Fig\\W-t(L=200).png")
+#savefig("C:\\Users\\Yaghoub\\Documents\\GitHub\\Ballistic-Deposition\\Deposition\\Ballistic-Deposition-with-Relaxation\\Fig\\W-t(L=200).png")
 
 #=
 Time = exp.(0:Parameters[:tot_time]/(Parameters[:time_steps]-1):Parameters[:tot_time])
