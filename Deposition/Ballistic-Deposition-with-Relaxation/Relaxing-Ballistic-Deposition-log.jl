@@ -41,24 +41,25 @@ function FindLine(tot_steps, Time, VarList)
                             )
         Line = Linear_fit(;Paraline...)
         absl = abs(Line[1]*Time[i] + Line[2] - VarList[i])
-        standev = std(Line[1].*Time[2:i] .+ Line[2] .- VarList[2:i])
-        if absl > 1 && standev > 1 && retline == [0.0 0.0]
+        standev = std(Line[1].*Time .+ Line[2] .- VarList)
+        if absl > 1 && standev > 2 && retline == [0.0 0.0]
             retline = Line
         end
-        if absl > 1.5 && standev > 2.5
+        if absl > 2 && standev > 3
             return retline, i
         end
     end
 end
+
+theme(:dark)
+gr()
+
 #=
 Parameters = Dict(
                 :len => 200,
                 :tot_time => 8,
                 :time_steps => 100)
 Time, VarList = Deposition(;Parameters...)
-
-theme(:dark)
-gr()
 
 scatter(log.(Time),log.(VarList),
     xlabel= L"Log\ Time",
@@ -74,27 +75,36 @@ plot!(X,Y,label = L"y = %$(round(Line[1],digits= 2))x + %$(round(Line[2],digits=
 
 savefig("C:\\Users\\Yaghoub\\Documents\\GitHub\\Ballistic-Deposition\\Deposition\\Ballistic-Deposition-with-Relaxation\\Fig\\log-log.png")
 =#
-
-Parameters = Dict(:len => 200,
-                    :tot_time => 6,
+iternum = 1000
+Parameters = Dict(:len => 100,
+                    :tot_time => 4,
                         :time_steps => 50)
-meanVar = [ 0.0 for i = 1:Parameters[:time_steps]]
-for i in 1:100
+allVar = [ [0.0 for i in 1:Parameters[:time_steps]] for j = 1:iternum]
+meanVar = [0.0 for i in 1:Parameters[:time_steps]]
+vars = [0.0 for i in 1:Parameters[:time_steps]]
+for i in 1:iternum
     Time, VarList = Deposition(;Parameters...)
+    allVar[i] = VarList
     meanVar += VarList
     print("\r$i")
 end
-VarList = meanVar / 100
-
+meanVar /= iternum
+for i in 1:Parameters[:time_steps]
+    vars[i] = log(std(hcat(allVar...)[i,:]))
+end
+std(hcat(allVar...)[1,:])
+scatter(log.(Time),log.(meanVar),
+    xlabel= L"Log\ Time",
+    ylabel= L"Log\ W_{(t)}",
+    title= L"Log-Log\ Plot\ ~W_{(t)}-Time~\ (D = 100)",
+    label = L"Data\ point",
+    yerror = vars,
+    legend = nothing)
+vars
+#=
 Time = exp.(0:Parameters[:tot_time]/(Parameters[:time_steps]-1):Parameters[:tot_time])
 Line, last_point = FindLine(Parameters[:time_steps], Time, VarList)
 X = 0:log(Time[last_point])
-Y = X .* Line[1] .+ Line[2]
+Y = X .* Line[1] .+ Line[2] =#
 
-scatter(log.(Time),log.(VarList),
-    xlabel= L"Log\ Time",
-    ylabel= L"Log\ W_{(t)}",
-    title= L"Log-Log\ Plot\ of\ ~W_{(t)}-Time~",
-    label = L"Data\ point")
-
-plot!(X,Y,label = L"y = %$(round(Line[1],digits= 2))x + %$(round(Line[2],digits= 2))")
+#plot!(X,Y,label = L"y = %$(round(Line[1],digits= 2))x + %$(round(Line[2],digits= 2))")
