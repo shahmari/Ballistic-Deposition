@@ -5,7 +5,7 @@ function Deposition(;len, tot_time, time_steps)
     surf = [0 for i=1:len]
     VarList = [0.0 for i=1:time_steps]
     for n in 2:time_steps+1
-        randsurf = rand(1:len,floor(Int,Time[n]-Time[n-1]))
+        randsurf = rand(1:len,floor(Int,Time[n]-Time[n-1])+1)
         for i in randsurf
             index = FindLeast(surf, i, len)
             surf[index] += 1
@@ -64,27 +64,7 @@ end
 theme(:dark)
 gr()
 
-#=
-Parameters = Dict(
-                :len => 200,
-                :tot_time => 8,
-                :time_steps => 100)
-Time, VarList = Deposition(;Parameters...)
 
-scatter(log.(Time),log.(VarList),
-    xlabel= L"Log\ Time",
-    ylabel= L"Log\ W_{(t)}",
-    title= L"Log-Log\ Plot\ of\ ~W_{(t)}-Time~",
-    label = L"Data\ point")
-
-
-Line, last_point = FindLine(Parameters[:time_steps], Time, VarList)
-X = 0:log(Time[last_point])
-Y = X .* Line[1] .+ Line[2]
-plot!(X,Y,label = L"y = %$(round(Line[1],digits= 2))x + %$(round(Line[2],digits= 2))")
-
-savefig("C:\\Users\\Yaghoub\\Documents\\GitHub\\Ballistic-Deposition\\Deposition\\Ballistic-Deposition-with-Relaxation\\Fig\\log-log.png")
-=#
 iternum = 1000
 Parameters = Dict(:len => 300,
                     :tot_time => 12,
