@@ -5,7 +5,7 @@ function Deposition(;len, tot_time, time_steps)
     surf = [0 for i=1:len+2]
     VarList = [0.0 for i=1:time_steps]
     for n in 1:time_steps
-        randsurf = rand(2:len+1,floor(Int,Time[n] + 200*exp(tot_time)))
+        randsurf = rand(2:len+1,floor(Int,Time[n]*100 + 1000))
         for i in randsurf
             if i == 2 && surf[i] >= surf[i-1] - 2
                 surf[i-1] += 1
@@ -76,8 +76,8 @@ plot!(X,Y,label = L"y = %$(round(Line[1],digits= 2))x + %$(round(Line[2],digits=
 savefig("C:\\Users\\Yaghoub\\Documents\\GitHub\\Ballistic-Deposition\\Deposition\\Ballistic-Deposition-with-Relaxation\\Fig\\log-log.png")
 =#
 iternum = 1000
-Parameters = Dict(:len => 100,
-                    :tot_time => 4,
+Parameters = Dict(:len => 300,
+                    :tot_time => 8,
                         :time_steps => 50)
 allVar = [ [0.0 for i in 1:Parameters[:time_steps]] for j = 1:iternum]
 meanVar = [0.0 for i in 1:Parameters[:time_steps]]
@@ -90,17 +90,19 @@ for i in 1:iternum
 end
 meanVar /= iternum
 for i in 1:Parameters[:time_steps]
-    vars[i] = log(std(hcat(allVar...)[i,:]))
+    vars[i] = std(log.(hcat(allVar...))[i,:])
 end
-std(hcat(allVar...)[1,:])
+
+Time = exp.(0:Parameters[:tot_time]/(Parameters[:time_steps]-1):Parameters[:tot_time])
 scatter(log.(Time),log.(meanVar),
     xlabel= L"Log\ Time",
     ylabel= L"Log\ W_{(t)}",
-    title= L"Log-Log\ Plot\ ~W_{(t)}-Time~\ (D = 100)",
+    title= L"Log-Log\ Plot\ ~W_{(t)}-Time~\ (L = 300)",
     label = L"Data\ point",
     yerror = vars,
     legend = nothing)
-vars
+savefig("C:\\Users\\Yaghoub\\Documents\\GitHub\\Ballistic-Deposition\\Deposition\\Ballistic-Deposition-with-Relaxation\\Fig\\W-t(L=200).png")
+
 #=
 Time = exp.(0:Parameters[:tot_time]/(Parameters[:time_steps]-1):Parameters[:tot_time])
 Line, last_point = FindLine(Parameters[:time_steps], Time, VarList)
