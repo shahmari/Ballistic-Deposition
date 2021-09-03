@@ -1,18 +1,18 @@
 using Plots, LaTeXStrings, Statistics
 
 function Deposition(;len, tot_time, time_steps)
-    Time = exp.(0:tot_time/(time_steps):tot_time)
+    Time = ceil.(Int, exp.(2:(tot_time-2)/(time_steps):tot_time))
     surf = [0 for i=1:len]
     VarList = [0.0 for i=1:time_steps]
     for n in 2:time_steps+1
-        randsurf = rand(1:len,floor(Int,(Time[n]-Time[n-1]))+1)
+        randsurf = rand(1:len,(Time[n]-Time[n-1]))
         for i in randsurf
             index = FindLeast(surf, i, len)
             surf[index] += 1
         end
         VarList[n-1] = std(surf)
     end
-    return Time, VarList
+    return VarList
 end
 
 function sides(n, L)
@@ -41,39 +41,39 @@ function Linear_fit(;Time, VarList, time_steps)
     return line
 end
 
-function FindLine(tot_steps, Time, VarList)
-    retline = [0.0 0.0]
-    for i in 5:tot_steps
-        Paraline = Dict(
-                        :Time => Time,
-                        :VarList => VarList,
-                        :time_steps => i
-                            )
-        Line = Linear_fit(;Paraline...)
-        absl = abs(Line[1]*Time[i] + Line[2] - VarList[i])
-        standev = std(Line[1].*Time .+ Line[2] .- VarList)
-        if absl > 1 && standev > 2 && retline == [0.0 0.0]
-            retline = Line
-        end
-        if absl > 2 && standev > 3
-            return retline, i
-        end
-    end
-end
+# function FindLine(tot_steps, Time, VarList)
+#     retline = [0.0 0.0]
+#     for i in 5:tot_steps
+#         Paraline = Dict(
+#                         :Time => Time,
+#                         :VarList => VarList,
+#                         :time_steps => i
+#                             )
+#         Line = Linear_fit(;Paraline...)
+#         absl = abs(Line[1]*Time[i] + Line[2] - VarList[i])
+#         standev = std(Line[1].*Time .+ Line[2] .- VarList)
+#         if absl > 0.2 && standev > 1 && retline == [0.0 0.0]
+#             retline = Line
+#         end
+#         if absl > 1 && standev > 3
+#             return retline, i
+#         end
+#     end
+# end
 
 theme(:dark)
 gr()
 
 
 iternum = 1000
-Parameters = Dict(:len => 200,
-                    :tot_time => 15,
-                        :time_steps => 100)
+Parameters = Dict(:len => 50,
+                    :tot_time => 10,
+                        :time_steps => 50)
 allVar = [ [0.0 for i in 1:Parameters[:time_steps]] for j = 1:iternum]
 meanVar = [0.0 for i in 1:Parameters[:time_steps]]
 vars = [0.0 for i in 1:Parameters[:time_steps]]
 for i in 1:iternum
-    Time, VarList = Deposition(;Parameters...)
+    VarList = Deposition(;Parameters...)
     allVar[i] = VarList
     meanVar += VarList
     print("\r$i")
@@ -83,20 +83,24 @@ for i in 1:Parameters[:time_steps]
     vars[i] = std(log.(hcat(allVar...))[i,:])
 end
 
-
-scatter(log.(Time[1:end-1]), log.(meanVar),
-    xlims = (1,Parameters[:tot_time]),
+Time = exp.(0:(Parameters[:tot_time])/(Parameters[:time_steps]-1):Parameters[:tot_time])
+scatter(log.(Time[10:end]), log.(meanVar[10:end]),
+    # xlims = (1, Parameters[:tot_time]),
     xlabel= L"Log\ Time",
     ylabel= L"Log\ W_{(t)}",
-    title= L"Log-Log\ Plot\ ~W_{(t)}-Time~\ (L = 200)",
+    title= L"Log-Log\ Plot\ ~W_{(t)}-Time~\ (L = %$(Parameters[:len]))",
     label = L"Data\ point",
-    yerror = vars,
-    legend = nothing)
-savefig("C:\\Users\\Yaghoub\\Documents\\GitHub\\Ballistic-Deposition\\Deposition\\Ballistic-Deposition-with-Relaxation\\Fig\\W-t(L=200).png")
+    yerror = vars)
+    # legend = nothing)
 
+Paraline = Dict(
+                :Time => Time[10:end],
+                :VarList => meanVar[10:end],
+                :time_steps => 20)
+Line = Linear_fit(;Paraline...)
+X = log.(Time[10]:Time[40])
+Y = X .* Line[1] .+ Line[2]
 
-# Line, last_point = FindLine(Parameters[:time_steps], Time[1:end-1], meanVar)
-# X = 0:log(Time[last_point])
-# Y = X .* Line[1] .+ Line[2]
-#
-# plot!(X,Y,label = L"y = %$(round(Line[1],digits= 2))x + %$(round(Line[2],digits= 2))")
+plot!(X,Y,label = L"y = %$(round(Line[1],digits= 2))x + %$(round(Line[2],digits= 2))")
+
+savefig("C:\\Users\\Yaghoub\\Documents\\GitHub\\Ballistic-Deposition\\Deposition\\Ballistic-Deposition-with-Relaxation\\Fig\\W-t(L=$(Parameters[:len])).png")
