@@ -5,7 +5,7 @@ function Deposition(;len, tot_time, time_steps)
     surf = [0 for i=1:len]
     VarList = [0.0 for i=1:time_steps]
     for n in 2:time_steps+1
-        randsurf = rand(1:len,floor(Int,Time[n]-Time[n-1])+1)
+        randsurf = rand(1:len,floor(Int,(Time[n]-Time[n-1]))+1)
         for i in randsurf
             index = FindLeast(surf, i, len)
             surf[index] += 1
@@ -66,8 +66,8 @@ gr()
 
 
 iternum = 1000
-Parameters = Dict(:len => 300,
-                    :tot_time => 12,
+Parameters = Dict(:len => 200,
+                    :tot_time => 15,
                         :time_steps => 100)
 allVar = [ [0.0 for i in 1:Parameters[:time_steps]] for j = 1:iternum]
 meanVar = [0.0 for i in 1:Parameters[:time_steps]]
@@ -83,20 +83,20 @@ for i in 1:Parameters[:time_steps]
     vars[i] = std(log.(hcat(allVar...))[i,:])
 end
 
-Time = hcat(0:Parameters[:tot_time]/(Parameters[:time_steps]-1):Parameters[:tot_time])
-scatter(Time, log.(meanVar),
+
+scatter(log.(Time[1:end-1]), log.(meanVar),
+    xlims = (1,Parameters[:tot_time]),
     xlabel= L"Log\ Time",
     ylabel= L"Log\ W_{(t)}",
-    title= L"Log-Log\ Plot\ ~W_{(t)}-Time~\ (L = 300)",
+    title= L"Log-Log\ Plot\ ~W_{(t)}-Time~\ (L = 200)",
     label = L"Data\ point",
     yerror = vars,
     legend = nothing)
-#savefig("C:\\Users\\Yaghoub\\Documents\\GitHub\\Ballistic-Deposition\\Deposition\\Ballistic-Deposition-with-Relaxation\\Fig\\W-t(L=200).png")
+savefig("C:\\Users\\Yaghoub\\Documents\\GitHub\\Ballistic-Deposition\\Deposition\\Ballistic-Deposition-with-Relaxation\\Fig\\W-t(L=200).png")
 
-#=
-Time = exp.(0:Parameters[:tot_time]/(Parameters[:time_steps]-1):Parameters[:tot_time])
-Line, last_point = FindLine(Parameters[:time_steps], Time, VarList)
-X = 0:log(Time[last_point])
-Y = X .* Line[1] .+ Line[2] =#
 
-#plot!(X,Y,label = L"y = %$(round(Line[1],digits= 2))x + %$(round(Line[2],digits= 2))")
+# Line, last_point = FindLine(Parameters[:time_steps], Time[1:end-1], meanVar)
+# X = 0:log(Time[last_point])
+# Y = X .* Line[1] .+ Line[2]
+#
+# plot!(X,Y,label = L"y = %$(round(Line[1],digits= 2))x + %$(round(Line[2],digits= 2))")
