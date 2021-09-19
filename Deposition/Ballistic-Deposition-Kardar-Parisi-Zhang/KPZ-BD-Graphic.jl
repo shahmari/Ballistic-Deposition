@@ -1,5 +1,4 @@
-using Plots
-using Statistics
+using Plots, LaTeXStrings, Statistics
 
 function Deposition_2DG(; len, tot_time, dep_rate, color_step)
     surf = [[] for i=1:len]
