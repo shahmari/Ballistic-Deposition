@@ -1,28 +1,33 @@
 using Plots, LaTeXStrings, Statistics
 
 function Deposition_2DG(; len, tot_time, dep_rate, color_step)
-    surface = InitialSurf(200)
+    surface = InitialSurf(len)
     for n in 0:tot_time
         randsurf = rand(1:len, dep_rate)
         for i in randsurf
-            i1 , i2 = sides(i, len)
-            if surface[end][i] != 0
-                newsurf = [0 for j = 1:len]
-                newsurf[i] = (n%color_step) + 1
-                push!(surface, newsurf)
-            end
-            for num in 0:length(surface) -1
-                if surface[end - num][i] == 0 && (surface[end - num][i1] != 0 || surface[end - num][i2] != 0)
-                    surface[end - num][i] = (n%color_step) + 1
-                    break
-                elseif length(surface) > num + 1 && surface[end - 1 - num][i] != 0
-                    surface[end - num][i] = (n%color_step) + 1
-                    break
-                end
-            end
+            surface = check_and_depose(surface, i, len, (n%color_step) + 1)
         end
     end
     return surface
+end
+
+function check_and_depose(surf, index, len, addval) #checking down and sides and first layer
+    i1 , i2 = sides(index, len)
+    if surf[end][index] != 0
+        newsurf = [0 for j = 1:len]
+        newsurf[index] = addval
+        push!(surf, newsurf)
+    end
+    for num in 0:length(surf) -1
+        if surf[end - num][index] == 0 && (surf[end - num][i1] != 0 || surf[end - num][i2] != 0)
+            surf[end - num][index] = addval
+            break
+        elseif length(surf) > num + 1 && surf[end - 1 - num][index] != 0
+            surf[end - num][index] = addval
+            break
+        end
+    end
+    return surf
 end
 
 function sides(n, L)
@@ -41,9 +46,9 @@ function InitialSurf(len)
     return [pos1]
 end
 
-Parameters = Dict(:len => 200,
-                    :tot_time => 800,
-                        :dep_rate => 40,
+Parameters = Dict(:len => 300,
+                    :tot_time => 1000,
+                        :dep_rate => 50,
                             :color_step => 100)
 
 surf = Deposition_2DG(;Parameters...)
