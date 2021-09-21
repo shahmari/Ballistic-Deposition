@@ -94,4 +94,4 @@ scatter(0:Parameters[:tot_time], meanVal,
     yerror = vars,
     legend = 150)
 
-savefig("C:\\Users\\Yaghoub\\Documents\\GitHub\\Ballistic-Deposition\\Deposition\\Ballistic-Deposition-KPZ-Type2\\Fig\\deposition.png")
+savefig("C:\\Users\\Yaghoub\\Documents\\GitHub\\Ballistic-Deposition\\Deposition\\Ballistic-Deposition-KPZ-Type2\\Fig\\histplot.png")
