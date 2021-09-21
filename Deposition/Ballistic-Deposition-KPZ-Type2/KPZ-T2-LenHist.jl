@@ -13,16 +13,40 @@ function Deposition(; len, tot_time, dep_rate, color_step)
     return AllLens
 end
 
+# function Check_Dlen(surf)
+#     Dlen = []
+#     for row in surf
+#         lenf = 0
+#         for num in 1:length(row)
+#             if row[num] == 0
+#                 lenf += 1
+#             else
+#                 break
+#             end
+#         end
+#         lenb = 0
+#         for num in length(row):-1:1
+#             if row[num] == 0
+#                 lenb += 1
+#             else
+#                 break
+#             end
+#         end
+#         append!(Dlen, length(row) - (lenb+lenf))
+#     end
+#     return max(Dlen...)
+# end
+
 function Check_Dlen(surf)
     Dlen = []
-    for i in surf
-        len = 0
-        for num in i
-            if num != 0
-                len += 1
+    for row in surf
+        yindex = []
+        for num in 1:length(row)
+            if row[num] != 0
+                append!(yindex, num)
             end
         end
-        append!(Dlen, len)
+        append!(Dlen, max(yindex...) - min(yindex...))
     end
     return max(Dlen...)
 end
@@ -64,7 +88,7 @@ end
 
 Parameters = Dict(:len => 300,
                     :tot_time => 50,
-                        :dep_rate => 2000,
+                        :dep_rate => 1000,
                             :color_step => 100)
 
 
